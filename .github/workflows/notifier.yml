@@ -1,0 +1,122 @@
+name: List of Actions to Monitor
+permissions:
+  contents: read
+  pull-requests: write
+
+# INSTRUCTIONS:
+## ADD your actions to the list below
+## REMOVE any existing actions you don't want to monitor
+### Update Levels:
+  #^ Monitor all releases (even patch releases) by specifying the full version:
+    #- uses: actions/checkout@v6.0.3
+  ### or
+  #^ Monitor only full releases, by just including the top level number:
+    #- uses: actions/checkout@v6
+  ### or
+  #^ Monitor specific sha-pinned version (most secure), by adding the commit sha directly (followed by the version in comments):
+    #-uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  run_update_notifier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Cache Python environment
+        id: cache-python-env-patches
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.venv
+          key: ${{ runner.os }}-notifier-python
+          restore-keys: ${{ runner.os }}-notifier-python-
+
+      - name: Setup Python
+        if: steps.cache-python-env-patches.outputs.cache-hit != 'true'
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+        with:
+          languages: 'typescript'
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+
+      - name: create issue 0
+        id: wr0
+        if: ${{ env.RESULTFOUND0 > 0 }}
+        uses: dacbd/create-issue-action@cdb57ab6ff8862aa09fee2be6ba77a59581921c2 # v2.0.0
+        with:
+          token: ${{ github.token }}
+          title: Test
+          body: |
+            Test
+
+      - name: create issue 1
+        id: wr1
+        if: ${{ env.RESULTFOUND0 > 0 }}
+        uses: BenRogersWPG/create-issue-action@9c276cf993ebdb64b14f7949e3d2008f97d65075 # v1.0.2
+        with:
+          token: ${{ github.token }}
+          title: Test
+          body: |
+            Test
+
+      - name: update issue 0
+        if: ${{ env.RESULTFOUND0 > 0 }}
+        uses: julien-deramond/update-issue-body@a7fae45395cac5a23318d38f7b09a58650dfe84f # v1.1.0
+        with:
+          issue-number: ${{ steps.wr0.outputs.number }}
+          body: |
+            test
+          edit-mode: replace
+
+      - name: update issue 1
+        if: ${{ env.RESULTFOUND0 > 0 }}
+        uses: BenRogersWPG/update-issue-body@1826dc097ac7208d9467719987c89c98eaacfeda # v2.0.2
+        with:
+          issue-number: ${{ steps.wr1.outputs.number }}
+          body: |
+            test
+          edit-mode: replace
+
+      - name: Upload JSON file
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: readme
+          path: README.md
+
+      - name: Get Artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: env-vars
+
+
+      - name: Script
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const repo = context.repo.repo;
+
+      - name: Setup Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697 # v1.0.13
+        with:
+          source: ./
+          destination: ./_site
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
