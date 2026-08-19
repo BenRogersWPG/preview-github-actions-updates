@@ -1,4 +1,4 @@
-# A clone of the [GitHub Actions Update Notifier](https://github.com/BenRogersWPG/Github-Actions-Update-Notifier)
+# A preview fork of the [GitHub Actions Update Notifier](https://github.com/BenRogersWPG/Github-Actions-Update-Notifier)
 
 ## pip Update Notifier
 
