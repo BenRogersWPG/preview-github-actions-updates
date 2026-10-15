@@ -97,7 +97,7 @@ dependencies:
         repo_id: 408534733
     'github/codeql-action@v4.38.3':
         ref: 'v4.38.3'
-        commit: 'sha1-24c54180a607b1449ed407dd24f251e4e9147c84'
+        commit: 'sha1-24c54180a607b1449ed407dd24f251e4e9147c8d'
         owner_id: 9919
         repo_id: 259445878
     'julien-deramond/update-issue-body@v1.1.0':
